@@ -2,10 +2,10 @@
 ## Required Environment
 
 * We recommend to use [PyCharm](https://www.jetbrains.com/pycharm/download/) as the IDE. 
-But you could use other IDEs(e.g. IntelliJ) or any other code editor.
+But you could use other IDEs(e.g. IntelliJ) or any other code editors.
 * In order to make it easier for you to install all required libraries (Keras, TensorFlow, scikit-learn, pandas, etc), 
-we would recommend you to install [Anaconda](https://docs.anaconda.com/anaconda/install/). In particular, you could use an environment which is identical with mine as the following steps:
-1. Install Anaconda
+we would recommend you to install [Anaconda](https://docs.anaconda.com/anaconda/install/). In particular, you could use an environment which is identical with ours as the following steps:
+1. [Install Anaconda](https://docs.continuum.io/anaconda/install/)
 2. Add conda to your $PATH variable: /home/your_username/anaconda3/condabin
 3. Move to the project directory: cd */deep-spatial-join
 4. Follow this tutorial to create an environment from our environment.yml file: [Creating an environment from an environment.yml file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
@@ -32,9 +32,9 @@ python train.py --tab data/tabular/tabular_all.csv --hist data/histograms/ --res
 ```
 
 ## How to modify the current implementation?
-* You can change the parameters, add/remove layers of MLP and CNN model at the function create_mlp and create_cnn in the models.py module.
+* You can change the parameters, add/remove layers of MLP and CNN model at the function *create_mlp* and *create_cnn* in the [models.py](models.py) module.
 * You can train/test in a specific group of datasets by using the corresponding join results at data/join_results.
-* What if you want to train/test your own data?
+* What if you want to train/test with your own data?
 1. Run the join queries.
 2. Export input dataset's histograms.
 3. Export input dataset's spatial descriptors.
