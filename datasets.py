@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+import copy
 import math
 
 
@@ -12,6 +13,7 @@ def load_datasets_feature(filename):
 def load_join_data(features_df, result_file, histograms_path, num_rows, num_columns):
     cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
     result_df = pd.read_csv(result_file, delimiter=',', header=None, names=cols)
+    result_df = result_df[result_df.result_size != 0]
     # result_df = result_df.sample(frac=1)
     result_df = pd.merge(result_df, features_df, left_on='dataset1', right_on='dataset_name')
     result_df = pd.merge(result_df, features_df, left_on='dataset2', right_on='dataset_name')
@@ -33,7 +35,12 @@ def load_join_data(features_df, result_file, histograms_path, num_rows, num_colu
     mbr_tests = result_df['mbr_tests']
 
     join_selectivity = result_size / (cardinality_x * cardinality_y)
-    join_selectivity = join_selectivity * math.pow(10, 9)
+    # join_selectivity = join_selectivity * math.pow(10, 9)
+    join_selectivity_log = copy.deepcopy(join_selectivity)
+    join_selectivity_log = join_selectivity_log.apply(lambda x: (-1) * math.log10(x))
+
+    # print(join_selectivity)
+    # join_selectivity = -math.log10(join_selectivity)
 
     mbr_tests_selectivity = mbr_tests / (cardinality_x * cardinality_y)
     mbr_tests_selectivity = mbr_tests_selectivity * math.pow(10, 9)
@@ -63,9 +70,12 @@ def load_join_data(features_df, result_file, histograms_path, num_rows, num_colu
     result_df['dataset2'] = dataset2
     result_df.insert(len(result_df.columns), 'result_size', result_size, True)
     result_df.insert(len(result_df.columns), 'join_selectivity', join_selectivity, True)
+    result_df.insert(len(result_df.columns), 'join_selectivity_log', join_selectivity_log, True)
     result_df.insert(len(result_df.columns), 'mbr_tests', mbr_tests, True)
     result_df.insert(len(result_df.columns), 'mbr_tests_selectivity', mbr_tests_selectivity, True)
     result_df.insert(len(result_df.columns), 'duration', duration, True)
+
+    result_df.to_csv('data/temp/result_df.csv')
 
     return result_df, ds1_histograms, ds2_histograms, ds_all_histogram, ds_bops_histogram
 

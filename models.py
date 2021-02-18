@@ -84,13 +84,13 @@ def run(tabular_path, histogram_path, join_result_path, model_path, model_weight
     print ('Histogram path: {}'.format(histogram_path))
     print ('Join result data: {}'.format(join_result_path))
 
-    target = 'join_selectivity'
+    target = 'join_selectivity_log'
     num_rows, num_columns = 16, 16
     tabular_features_df = datasets.load_datasets_feature(tabular_path)
     join_data, ds1_histograms, ds2_histograms, ds_all_histogram, ds_bops_histogram = datasets.load_join_data(
         tabular_features_df, join_result_path, histogram_path, num_rows, num_columns)
 
-    num_features = len(join_data.columns) - 10
+    num_features = len(join_data.columns) - 11
 
     if is_train:
         train_attributes, test_attributes, ds1_histograms_train, ds1_histograms_test, ds2_histograms_train, ds2_histograms_test, ds_all_histogram_train, ds_all_histogram_test, ds_bops_histogram_train, ds_bops_histogram_test = train_test_split(
