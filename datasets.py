@@ -1,8 +1,54 @@
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
 import copy
 import math
+
+# A shared random state will ensure that data is split in a same way in both train and test function
+RANDOM_STATE = 42
+
+
+def load_tabular_features(join_result_path, tabular_path, normalize=False):
+    tabular_features_df = pd.read_csv(tabular_path, delimiter=',', header=0)
+    cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
+    join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
+    join_df = join_df[join_df.result_size != 0]
+    join_df = pd.merge(join_df, tabular_features_df, left_on='dataset1', right_on='dataset_name')
+    join_df = pd.merge(join_df, tabular_features_df, left_on='dataset2', right_on='dataset_name')
+
+    cardinality_x = join_df[' cardinality_x']
+    cardinality_y = join_df[' cardinality_y']
+    result_size = join_df['result_size']
+
+    join_selectivity = result_size / (cardinality_x * cardinality_y)
+
+    join_df = join_df.drop(
+        columns=['result_size', 'dataset1', 'dataset2', 'dataset_name_x', 'dataset_name_y', ' cardinality_x',
+                 ' cardinality_y', 'mbr_tests', 'duration'])
+
+    join_df['cardinality_x'] = cardinality_x
+    join_df['cardinality_y'] = cardinality_y
+
+    join_df = join_df.rename(columns={x: y for x, y in zip(join_df.columns, range(0, len(join_df.columns)))})
+
+    join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
+
+    # Save the number of features in order to extract (X, y) correctly
+    num_features = len(join_df.columns) - 1
+
+    # TODO: delete this dumping action. This is just for debugging
+    join_df.to_csv('data/temp/join_df.csv')
+
+    target = 'join_selectivity'
+    train_data, test_data = train_test_split(join_df, test_size=0.20, random_state=RANDOM_STATE)
+
+    X_train = pd.DataFrame.to_numpy(train_data[[i for i in range(num_features)]])
+    y_train = train_data[target]
+    X_test = pd.DataFrame.to_numpy(test_data[[i for i in range(num_features)]])
+    y_test = test_data[target]
+
+    return X_train, y_train, X_test, y_test
 
 
 def load_datasets_feature(filename):

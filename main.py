@@ -4,8 +4,6 @@ from linear_regression_model import LinearRegressionModel
 
 
 def main():
-    print('Training the join cardinality estimator')
-
     parser = OptionParser()
     parser.add_option('-t', '--tab', type='string', help='Path to the tabular data file(CSV)')
     parser.add_option('-g', '--hist', type='string', help='Path to the histograms of input datasets')
