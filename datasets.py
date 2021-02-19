@@ -21,7 +21,7 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
     cardinality_y = join_df['cardinality_y']
     result_size = join_df['result_size']
 
-    join_selectivity = result_size / (cardinality_x * cardinality_y)
+    join_selectivity = 1 - result_size / (cardinality_x * cardinality_y)
 
     join_df = join_df.drop(
         columns=['result_size', 'dataset1', 'dataset2', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration'])

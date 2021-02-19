@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from keras.callbacks import EarlyStopping
 from keras.layers.core import Dense
-from keras.losses import mean_squared_logarithmic_error, mean_absolute_error
+from keras.losses import mean_squared_logarithmic_error, mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 from keras.models import Sequential
 from keras.optimizers import Adam
 # from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error, mean_squared_error
@@ -36,7 +36,7 @@ class DNNModel(ModelInterface):
         LR = 1e-2
         opt = Adam(lr=LR)
         model.compile(
-            optimizer=opt, loss=mean_absolute_error, metrics=[mean_absolute_error],
+            optimizer=opt, loss=mean_absolute_percentage_error, metrics=[mean_absolute_error, mean_squared_error],
         )
         early_stopping = EarlyStopping(
             monitor="val_loss",
