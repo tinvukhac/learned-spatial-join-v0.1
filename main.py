@@ -1,10 +1,10 @@
 from optparse import OptionParser
 
-import models
+from linear_regression_model import LinearRegressionModel
 
 
 def main():
-    print ('Training the join cardinality estimator')
+    print('Training the join cardinality estimator')
 
     parser = OptionParser()
     parser.add_option('-t', '--tab', type='string', help='Path to the tabular data file(CSV)')
@@ -25,7 +25,12 @@ def main():
         model_path = options_dict['model']
         model_weights_path = options_dict['weights']
         is_train = options_dict['train']
-        models.run(tabular_path, histogram_path, join_result_path, model_path, model_weights_path, is_train)
+        lr = LinearRegressionModel()
+        if is_train:
+            lr.train(tabular_path, join_result_path, model_path)
+        else:
+            mse, mape, msle, mae = lr.test(tabular_path, join_result_path, model_path)
+            print('mse: {}\nmape: {}\nmlse: {}\nmae: {}'.format(mse, mape, msle, mae))
 
     except RuntimeError:
         print('Please check your arguments')

@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from keras.losses import MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
 from keras.losses import mean_squared_logarithmic_error
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error, mean_squared_error
 from sklearn.model_selection import train_test_split
 
 import datasets
@@ -16,7 +16,6 @@ def main():
     cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
     join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
     join_df = join_df[join_df.result_size != 0]
-    # result_df = result_df.sample(frac=1)
     join_df = pd.merge(join_df, tabular_features_df, left_on='dataset1', right_on='dataset_name')
     join_df = pd.merge(join_df, tabular_features_df, left_on='dataset2', right_on='dataset_name')
 
@@ -59,13 +58,10 @@ def main():
     test_df['y_pred'] = y_pred
     test_df.to_csv('data/temp/test_df.csv')
 
-    mse = MeanSquaredError()
-    print(f'MSE {mse(y_test, y_pred).numpy()}')
-    mape = MeanAbsolutePercentageError()
-    print(f'MAPE {mape(y_test, y_pred).numpy()}')
+    print(f'MSE {mean_squared_error(y_test, y_pred)}')
+    print(f'MAPE {mean_absolute_percentage_error(y_test, y_pred)}')
     print(f'Mean Square Logarithmic Error {np.mean(mean_squared_logarithmic_error(y_test, y_pred))}')
-    mae = MeanAbsoluteError()
-    print(f'MAE {mae(y_test, y_pred).numpy()}')
+    print(f'MAE {mean_absolute_error(y_test, y_pred)}')
 
 
 if __name__ == '__main__':
