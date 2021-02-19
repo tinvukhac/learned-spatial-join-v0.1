@@ -10,28 +10,43 @@ RANDOM_STATE = 42
 
 
 def load_tabular_features(join_result_path, tabular_path, normalize=False):
-    tabular_features_df = pd.read_csv(tabular_path, delimiter=',', header=0)
+    tabular_features_df = pd.read_csv(tabular_path, delimiter='\\s*,\\s*', header=0)
     cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
     join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
     join_df = join_df[join_df.result_size != 0]
     join_df = pd.merge(join_df, tabular_features_df, left_on='dataset1', right_on='dataset_name')
     join_df = pd.merge(join_df, tabular_features_df, left_on='dataset2', right_on='dataset_name')
 
-    cardinality_x = join_df[' cardinality_x']
-    cardinality_y = join_df[' cardinality_y']
+    cardinality_x = join_df['cardinality_x']
+    cardinality_y = join_df['cardinality_y']
     result_size = join_df['result_size']
 
     join_selectivity = result_size / (cardinality_x * cardinality_y)
 
     join_df = join_df.drop(
-        columns=['result_size', 'dataset1', 'dataset2', 'dataset_name_x', 'dataset_name_y', ' cardinality_x',
-                 ' cardinality_y', 'mbr_tests', 'duration'])
-
-    join_df['cardinality_x'] = cardinality_x
-    join_df['cardinality_y'] = cardinality_y
+        columns=['result_size', 'dataset1', 'dataset2', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration'])
 
     # Rename the column's names to numbers for easier access
     join_df = join_df.rename(columns={x: y for x, y in zip(join_df.columns, range(0, len(join_df.columns)))})
+    # print(join_df[[join_df.columns[0], join_df.columns[1]]])
+
+    if normalize:
+        x = join_df.values  # returns a numpy array
+        min_max_scaler = preprocessing.MinMaxScaler()
+        x_scaled = min_max_scaler.fit_transform(x)
+        join_df = pd.DataFrame(x_scaled)
+        # column_groups = [
+        #     [' AVG area_x', ' AVG area_y'],
+        #     [' AVG x_x', ' AVG y_x', ' AVG x_y', ' AVG y_y'],
+        #     ['E0_x', 'E2_x', 'E0_y', 'E2_y'],
+        #     ['cardinality_x', 'cardinality_y'],
+        # ]
+        # for column_group in column_groups:
+        #     input_data = join_df[column_group].to_numpy()
+        #     original_shape = input_data.shape
+        #     reshaped = input_data.reshape(input_data.size, 1)
+        #     reshaped = preprocessing.minmax_scale(reshaped)
+        #     join_df[column_group] = reshaped.reshape(original_shape)
 
     # Save the number of features in order to extract (X, y) correctly
     num_features = len(join_df.columns)

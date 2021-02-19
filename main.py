@@ -1,5 +1,6 @@
 from optparse import OptionParser
 
+from dnn_model import DNNModel
 from linear_regression_model import LinearRegressionModel
 
 
@@ -22,12 +23,13 @@ def main():
     try:
         model_name = options_dict['model']
         if model_name not in model_names:
-            print('Available model is {}'.format(','.join(model_names)))
+            print('Available model are {}'.format(', '.join(model_names)))
+            return
         else:
             if model_name == 'linear':
                 model = LinearRegressionModel()
             elif model_name == 'dnn':
-                model = None
+                model = DNNModel()
 
         tabular_path = options_dict['tab']
         histogram_path = options_dict['hist']
