@@ -24,11 +24,11 @@ we would recommend you to install [Anaconda](https://docs.anaconda.com/anaconda/
 ## Train and test the models
 * Train a model (then test):
 ```python
-python train.py --tab data/tabular/tabular_all.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --model trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --train
+python main.py --model linear --tab data/tabular/tabular_all.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --path trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --train
 ```
 * Test a model (no train):
 ```python
-python train.py --tab data/tabular/tabular_all.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --model trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --no-train
+python main.py --model linear --tab data/tabular/tabular_all.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --path trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --no-train
 ```
 
 ## How to modify the current implementation?

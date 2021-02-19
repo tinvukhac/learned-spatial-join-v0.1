@@ -30,16 +30,19 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
     join_df['cardinality_x'] = cardinality_x
     join_df['cardinality_y'] = cardinality_y
 
+    # Rename the column's names to numbers for easier access
     join_df = join_df.rename(columns={x: y for x, y in zip(join_df.columns, range(0, len(join_df.columns)))})
 
-    join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
-
     # Save the number of features in order to extract (X, y) correctly
-    num_features = len(join_df.columns) - 1
+    num_features = len(join_df.columns)
+
+    # Append the target to the right of data frame
+    join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
 
     # TODO: delete this dumping action. This is just for debugging
     join_df.to_csv('data/temp/join_df.csv')
 
+    # Split join data to train and test data
     target = 'join_selectivity'
     train_data, test_data = train_test_split(join_df, test_size=0.20, random_state=RANDOM_STATE)
 
