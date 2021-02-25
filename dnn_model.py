@@ -6,7 +6,7 @@ from keras.layers.core import Dense
 from keras.losses import mean_squared_logarithmic_error, mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 from keras.models import Sequential
 from keras.optimizers import Adam
-# from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error, mean_squared_error
+from sklearn import metrics
 
 import datasets
 from model_interface import ModelInterface
@@ -17,6 +17,12 @@ VAL_SIZE = 0.2
 
 
 class DNNModel(ModelInterface):
+    NORMALIZE = False
+    DISTRIBUTION = 'all'
+    MATCHED = True
+    SCALE = 'Small'
+    MINUS_ONE = False
+
     def train(self, tabular_path: str, join_result_path: str, model_path: str, model_weights_path=None,
               histogram_path=None) -> None:
         """
@@ -24,7 +30,8 @@ class DNNModel(ModelInterface):
         """
 
         # Extract train and test data, but only use train data
-        X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, normalize=False)
+        X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(DNNModel.DISTRIBUTION, DNNModel.MATCHED, DNNModel.SCALE, DNNModel.MINUS_ONE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, DNNModel.NORMALIZE)
 
         # Define a sequential deep neural network model
         model = Sequential()
@@ -33,10 +40,10 @@ class DNNModel(ModelInterface):
         model.add(Dense(1, activation='sigmoid'))
 
         # Compile and fit the model
-        LR = 1e-3
+        LR = 1e-2
         opt = Adam(lr=LR)
         model.compile(
-            optimizer=opt, loss=mean_absolute_percentage_error
+            optimizer=opt, loss=mean_absolute_percentage_error, metrics=[mean_absolute_error, mean_squared_error]
         )
         early_stopping = EarlyStopping(
             monitor="val_loss",
@@ -76,11 +83,15 @@ class DNNModel(ModelInterface):
         test_df['y_pred'] = y_pred
         test_df.to_csv('data/temp/test_df.csv')
 
+        # Convert back to 1 - y if need
+        if DNNModel.MINUS_ONE:
+            y_test, y_pred = 1 - y_test, 1 - y_pred
+
         # Compute accuracy metrics
-        mse = mean_squared_error(y_test, y_pred)
-        mape = mean_absolute_percentage_error(y_test, y_pred)
+        mse = metrics.mean_squared_error(y_test, y_pred)
+        mape = metrics.mean_absolute_percentage_error(y_test, y_pred)
         msle = np.mean(mean_squared_logarithmic_error(y_test, y_pred))
-        mae = mean_absolute_error(y_test, y_pred)
+        mae = metrics.mean_absolute_error(y_test, y_pred)
         print('mae: {}\nmape: {}\nmse: {}\nmlse: {}'.format(mae, mape, mse, msle))
         print('{}\t{}\t{}\t{}'.format(mae, mape, mse, msle))
 

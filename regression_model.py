@@ -15,15 +15,19 @@ from model_interface import ModelInterface
 
 class RegressionModel(ModelInterface):
     NORMALIZE = False
+    DISTRIBUTION = 'all'
+    MATCHED = False
+    SCALE = 'all'
+    MINUS_ONE = False
 
     def __init__(self, model_name):
         self.reg_model = LinearRegression()
         if model_name == 'linear':
             self.reg_model = LinearRegression()
         elif model_name == 'decision_tree':
-            self.reg_model = DecisionTreeRegressor(max_depth=6)
+            self.reg_model = DecisionTreeRegressor(max_depth=8)
         elif model_name == 'random_forest':
-            self.reg_model = RandomForestRegressor(max_depth=6, random_state=0)
+            self.reg_model = RandomForestRegressor(max_depth=8, random_state=0)
 
     def train(self, tabular_path: str, join_result_path: str, model_path: str, model_weights_path=None,
               histogram_path=None) -> None:
@@ -32,7 +36,8 @@ class RegressionModel(ModelInterface):
         """
 
         # Extract train and test data, but only use train data
-        X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE)
+        X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE)
 
         # Fit and save the model
         model = self.reg_model.fit(X_train, y_train)
@@ -46,11 +51,16 @@ class RegressionModel(ModelInterface):
         """
 
         # Extract train and test data, but only use test data
-        X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE)
+        X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE)
 
         # Load the model and use it for prediction
         loaded_model = pickle.load(open(model_path, 'rb'))
         y_pred = loaded_model.predict(X_test)
+
+        # Convert back to 1 - y if need
+        if RegressionModel.MINUS_ONE:
+            y_test, y_pred = 1 - y_test, 1 - y_pred
 
         # TODO: delete this dumping action. This is just for debugging
         test_df = pd.DataFrame()

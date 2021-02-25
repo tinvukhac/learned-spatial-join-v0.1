@@ -6,7 +6,40 @@ import copy
 import math
 
 # A shared random state will ensure that data is split in a same way in both train and test function
-RANDOM_STATE = 43
+RANDOM_STATE = 42
+
+
+def load_tabular_features_hadoop(distribution='all', matched=False, scale='all', minus_one=False):
+    tabular_path = 'data/join_results/train/join_cardinality_data_points_sara.csv'
+    print(tabular_path)
+    tabular_features_df = pd.read_csv(tabular_path, delimiter='\\s*,\\s*', header=0)
+
+    if distribution != 'all':
+        tabular_features_df = tabular_features_df[tabular_features_df['label'].str.contains('_{}'.format(distribution))]
+
+    if matched:
+        tabular_features_df = tabular_features_df[tabular_features_df['label'].str.contains('_Match')]
+
+    if scale != all:
+        tabular_features_df = tabular_features_df[tabular_features_df['label'].str.contains(scale)]
+
+    if minus_one:
+        tabular_features_df['join_sel'] = 1 - tabular_features_df['join_sel']
+
+    tabular_features_df = tabular_features_df.drop(columns=['label', 'coll1', 'D1', 'coll2', 'D2'])
+    tabular_features_df = tabular_features_df.rename(columns={x: y for x, y in zip(tabular_features_df.columns, range(0, len(tabular_features_df.columns)))})
+
+    # Get train and test data
+    train_data, test_data = train_test_split(tabular_features_df, test_size=0.20, random_state=RANDOM_STATE)
+
+    num_features = len(tabular_features_df.columns) - 1
+
+    X_train = pd.DataFrame.to_numpy(train_data[[i for i in range(num_features)]])
+    y_train = train_data[num_features]
+    X_test = pd.DataFrame.to_numpy(test_data[[i for i in range(num_features)]])
+    y_test = test_data[num_features]
+
+    return X_train, y_train, X_test, y_test
 
 
 def load_tabular_features(join_result_path, tabular_path, normalize=False):
@@ -21,7 +54,7 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
     cardinality_y = join_df['cardinality_y']
     result_size = join_df['result_size']
 
-    join_selectivity = result_size / (cardinality_x * cardinality_y)
+    join_selectivity = 1 - result_size / (cardinality_x * cardinality_y)
 
     join_df = join_df.drop(
         columns=['result_size', 'dataset1', 'dataset2', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration'])
@@ -306,15 +339,17 @@ def load_histograms2(result_df, histograms_path, num_rows, num_columns):
 def main():
     print('Dataset utils')
 
+    load_tabular_features_hadoop(distribution='Uniform', matched=True)
+
     # features_df = load_datasets_feature('data/uniform_datasets_features.csv')
     # load_join_data(features_df, 'data/uniform_result_size.csv', 'data/histogram_uniform_values', 16, 16)
 
-    features_df = load_datasets_feature('data/data_aligned/aligned_small_datasets_features.csv')
-    join_data, ds1_histograms, ds2_histograms, ds_all_histogram = load_join_data(features_df,
-                                                                                 'data/data_aligned/join_results_small_datasets.csv',
-                                                                                 'data/data_aligned/histograms/small_datasets', 32,
-                                                                                 32)
-    print (join_data)
+    # features_df = load_datasets_feature('data/data_aligned/aligned_small_datasets_features.csv')
+    # join_data, ds1_histograms, ds2_histograms, ds_all_histogram = load_join_data(features_df,
+    #                                                                              'data/data_aligned/join_results_small_datasets.csv',
+    #                                                                              'data/data_aligned/histograms/small_datasets', 32,
+    #                                                                              32)
+    # print (join_data)
 
 
 if __name__ == '__main__':
