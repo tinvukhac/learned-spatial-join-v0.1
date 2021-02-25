@@ -10,6 +10,6 @@ class ModelInterface:
              histogram_path=None) -> (float, float, float, float):
         """
         Evaluate the accuracy metrics of a trained  model for spatial join cost estimator
-        :return mean_squared_error, mean_absolute_percentage_error, mean_squared_logarithmic_error, mean_absolute_error
+        :return mean_absolute_error, mean_absolute_percentage_error, mean_squared_error, mean_squared_logarithmic_error
         """
         pass

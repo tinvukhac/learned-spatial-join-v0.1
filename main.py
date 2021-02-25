@@ -1,7 +1,7 @@
 from optparse import OptionParser
 
 from dnn_model import DNNModel
-from linear_regression_model import LinearRegressionModel
+from regression_model import RegressionModel
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     (options, args) = parser.parse_args()
     options_dict = vars(options)
 
-    model_names = ['linear', 'dnn']
+    model_names = ['linear', 'decision_tree', 'random_forest', 'dnn']
 
     try:
         model_name = options_dict['model']
@@ -26,8 +26,8 @@ def main():
             print('Available model are {}'.format(', '.join(model_names)))
             return
         else:
-            if model_name == 'linear':
-                model = LinearRegressionModel()
+            if model_name in ['linear', 'decision_tree', 'random_forest']:
+                model = RegressionModel(model_name)
             elif model_name == 'dnn':
                 model = DNNModel()
 
@@ -41,8 +41,9 @@ def main():
         if is_train:
             model.train(tabular_path, join_result_path, model_path, model_weights_path, histogram_path)
         else:
-            mse, mape, msle, mae = model.test(tabular_path, join_result_path, model_path, model_weights_path, histogram_path)
-            print('mse: {}\nmape: {}\nmlse: {}\nmae: {}'.format(mse, mape, msle, mae))
+            mae, mape, mse, msle = model.test(tabular_path, join_result_path, model_path, model_weights_path, histogram_path)
+            print('mae: {}\nmape: {}\nmse: {}\nmlse: {}'.format(mae, mape, mse, msle))
+            print('{}\t{}\t{}\t{}'.format(mae, mape, mse, msle))
 
     except RuntimeError:
         print('Please check your arguments')

@@ -24,7 +24,7 @@ class DNNModel(ModelInterface):
         """
 
         # Extract train and test data, but only use train data
-        X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, normalize=True)
+        X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, normalize=False)
 
         # Define a sequential deep neural network model
         model = Sequential()
@@ -33,10 +33,10 @@ class DNNModel(ModelInterface):
         model.add(Dense(1, activation='sigmoid'))
 
         # Compile and fit the model
-        LR = 1e-2
+        LR = 1e-3
         opt = Adam(lr=LR)
         model.compile(
-            optimizer=opt, loss=mean_absolute_percentage_error, metrics=[mean_absolute_error, mean_squared_error],
+            optimizer=opt, loss=mean_absolute_percentage_error
         )
         early_stopping = EarlyStopping(
             monitor="val_loss",
@@ -57,13 +57,13 @@ class DNNModel(ModelInterface):
             validation_split=VAL_SIZE,
         )
 
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
-        plt.title('model loss')
-        plt.ylabel('loss')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
-        plt.show()
+        # plt.plot(history.history['loss'])
+        # plt.plot(history.history['val_loss'])
+        # plt.title('model loss')
+        # plt.ylabel('loss')
+        # plt.xlabel('epoch')
+        # plt.legend(['train', 'test'], loc='upper left')
+        # plt.show()
 
         test_loss = model.evaluate(X_test, y_test)
         print(test_loss)
@@ -77,10 +77,12 @@ class DNNModel(ModelInterface):
         test_df.to_csv('data/temp/test_df.csv')
 
         # Compute accuracy metrics
-        # mse = mean_squared_error(y_test, y_pred)
-        # mape = mean_absolute_percentage_error(y_test, y_pred)
-        # msle = np.mean(mean_squared_logarithmic_error(y_test, y_pred))
-        # mae = mean_absolute_error(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mape = mean_absolute_percentage_error(y_test, y_pred)
+        msle = np.mean(mean_squared_logarithmic_error(y_test, y_pred))
+        mae = mean_absolute_error(y_test, y_pred)
+        print('mae: {}\nmape: {}\nmse: {}\nmlse: {}'.format(mae, mape, mse, msle))
+        print('{}\t{}\t{}\t{}'.format(mae, mape, mse, msle))
 
     def test(self, tabular_path: str, join_result_path: str, model_path: str, model_weights_path=None,
              histogram_path=None) -> (float, float, float, float):
