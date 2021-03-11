@@ -1,6 +1,7 @@
 from optparse import OptionParser
 
 from dnn_model import DNNModel
+from histogram_dnn_model import HistogramDNNModel
 from regression_model import RegressionModel
 
 
@@ -18,7 +19,7 @@ def main():
     (options, args) = parser.parse_args()
     options_dict = vars(options)
 
-    model_names = ['linear', 'decision_tree', 'random_forest', 'dnn']
+    model_names = ['linear', 'decision_tree', 'random_forest', 'dnn', 'hist_dnn']
 
     try:
         model_name = options_dict['model']
@@ -30,6 +31,8 @@ def main():
                 model = RegressionModel(model_name)
             elif model_name == 'dnn':
                 model = DNNModel()
+            elif model_name == 'hist_dnn':
+                model = HistogramDNNModel()
 
         tabular_path = options_dict['tab']
         histogram_path = options_dict['hist']

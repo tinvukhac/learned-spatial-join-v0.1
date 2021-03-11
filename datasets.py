@@ -97,6 +97,27 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
     return X_train, y_train, X_test, y_test
 
 
+def load_histogram_features(join_result_path, tabular_path, histograms_path, num_rows, num_columns):
+    tabular_features_df = pd.read_csv(tabular_path, delimiter='\\s*,\\s*', header=0)
+    cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
+    join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
+    join_df = join_df[join_df.result_size != 0]
+    join_df = pd.merge(join_df, tabular_features_df, left_on='dataset1', right_on='dataset_name')
+    join_df = pd.merge(join_df, tabular_features_df, left_on='dataset2', right_on='dataset_name')
+
+    cardinality_x = join_df['cardinality_x']
+    cardinality_y = join_df['cardinality_y']
+    result_size = join_df['result_size']
+
+    join_selectivity = result_size / (cardinality_x * cardinality_y)
+    join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
+
+    ds1_histograms, ds2_histograms, ds1_original_histograms, ds2_original_histograms, ds_all_histogram, ds_bops_histogram = load_histograms(
+        join_df, histograms_path, num_rows, num_columns)
+
+    return join_df['join_selectivity'], ds1_histograms, ds2_histograms, ds_bops_histogram
+
+
 def load_datasets_feature(filename):
     features_df = pd.read_csv(filename, delimiter=',', header=0)
     return features_df
@@ -230,7 +251,8 @@ def load_join_data2(features_df, result_file, histograms_path, num_rows, num_col
 
 
 def load_histogram(histograms_path, num_rows, num_columns, dataset):
-    hist = np.genfromtxt('{}/{}x{}/{}'.format(histograms_path, num_rows, num_columns, dataset), delimiter=',')
+    # hist = np.genfromtxt('{}/{}x{}/{}'.format(histograms_path, num_rows, num_columns, dataset), delimiter=',')
+    hist = np.genfromtxt('{}/{}'.format(histograms_path, dataset), delimiter=',')
     # normalized_hist = hist / hist.max() # divide by max value
     normalized_hist = hist / hist.sum() # divide by sum of all value
     normalized_hist = normalized_hist.reshape((hist.shape[0], hist.shape[1], 1))
@@ -254,13 +276,36 @@ def load_histograms(result_df, histograms_path, num_rows, num_columns):
     ds_all_histogram = []
     ds_bops_histogram = []
 
+    hist_dict = {}
+    normalized_hist_dict = {}
+
+    count = 0
     for dataset in result_df['dataset1']:
-        normalized_hist, hist = load_histogram(histograms_path, num_rows, num_columns, dataset)
+        count += 1
+        # print(count)
+        if dataset in hist_dict.keys():
+            normalized_hist = normalized_hist_dict[dataset]
+            hist = hist_dict[dataset]
+        else:
+            normalized_hist, hist = load_histogram(histograms_path, num_rows, num_columns, dataset)
+            hist_dict[dataset] = hist
+            normalized_hist_dict[dataset] = normalized_hist
+
         ds1_histograms.append(normalized_hist)
         ds1_original_histograms.append(hist)
 
+    count = 0
     for dataset in result_df['dataset2']:
-        normalized_hist, hist = load_histogram(histograms_path, num_rows, num_columns, dataset)
+        count += 1
+        # print(count)
+        if dataset in hist_dict.keys():
+            normalized_hist = normalized_hist_dict[dataset]
+            hist = hist_dict[dataset]
+        else:
+            normalized_hist, hist = load_histogram(histograms_path, num_rows, num_columns, dataset)
+            hist_dict[dataset] = hist
+            normalized_hist_dict[dataset] = normalized_hist
+
         ds2_histograms.append(normalized_hist)
         ds2_original_histograms.append(hist)
 
@@ -268,15 +313,15 @@ def load_histograms(result_df, histograms_path, num_rows, num_columns):
         hist1 = ds1_original_histograms[i]
         hist2 = ds2_original_histograms[i]
         combined_hist = np.dstack((hist1, hist2))
-        combined_hist = combined_hist / combined_hist.max()
+        combined_hist = combined_hist / combined_hist.sum()
         ds_all_histogram.append(combined_hist)
 
     for i in range(len(ds1_histograms)):
         hist1 = ds1_original_histograms[i]
         hist2 = ds2_original_histograms[i]
         bops_hist = np.multiply(hist1, hist2)
-        if bops_hist.max() > 0:
-            bops_hist = bops_hist / bops_hist.max()
+        if bops_hist.sum() > 0:
+            bops_hist = bops_hist / bops_hist.sum()
         ds_bops_histogram.append(bops_hist)
 
     return np.array(ds1_histograms), np.array(ds2_histograms), np.array(ds1_original_histograms), np.array(

@@ -130,3 +130,6 @@ dmypy.json
 
 #Idea
 .idea/
+
+# Temporary directories
+trained_models/
