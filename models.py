@@ -1,20 +1,21 @@
-from keras.models import Sequential, load_model
-from keras.layers.normalization import BatchNormalization
+import numpy as np
+import pandas as pd
+from keras.layers import Flatten
+from keras.layers import Input
+from keras.layers import concatenate
 from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.core import Activation
-from keras.layers.core import Dropout
 from keras.layers.core import Dense
-from keras.layers import concatenate
-from keras.layers import Flatten
-from keras.layers import Input
+from keras.layers.core import Dropout
+from keras.layers.normalization import BatchNormalization
+from keras.losses import mean_squared_logarithmic_error
 from keras.models import Model
+from keras.models import Sequential, load_model
 from keras.optimizers import Adam
-
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn import metrics
 from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
 
 import datasets
 
@@ -84,7 +85,7 @@ def run(tabular_path, histogram_path, join_result_path, model_path, model_weight
     print ('Histogram path: {}'.format(histogram_path))
     print ('Join result data: {}'.format(join_result_path))
 
-    target = 'join_selectivity_log'
+    target = 'join_selectivity'
     num_rows, num_columns = 16, 16
     tabular_features_df = datasets.load_datasets_feature(tabular_path)
     join_data, ds1_histograms, ds2_histograms, ds_all_histogram, ds_bops_histogram = datasets.load_join_data(
@@ -143,13 +144,37 @@ def run(tabular_path, histogram_path, join_result_path, model_path, model_weight
 
     print ('r2 score: {}'.format(r2_score(y_test, y_pred)))
 
-    diff = y_pred.flatten() - y_test
-    percent_diff = (diff / y_test)
-    abs_percent_diff = np.abs(percent_diff)
-
-    # Compute the mean and standard deviation of the absolute percentage difference
-    mean = np.mean(abs_percent_diff)
-    std = np.std(abs_percent_diff)
+    # diff = y_pred.flatten() - y_test
+    # percent_diff = (diff / y_test)
+    # abs_percent_diff = np.abs(percent_diff)
+    #
+    # # Compute the mean and standard deviation of the absolute percentage difference
+    # mean = np.mean(abs_percent_diff)
+    # std = np.std(abs_percent_diff)
 
     # NOTICE: mean is the MAPE value, which is the target we want to minimize
-    print ('mean = {}, std = {}'.format(mean, std))
+    # print ('mean = {}, std = {}'.format(mean, std))
+    minus_one = True
+    if minus_one:
+        y_test, y_pred = 1 - y_test, 1 - y_pred
+
+    # Compute accuracy metrics
+    mse = metrics.mean_squared_error(y_test, y_pred)
+    mape = metrics.mean_absolute_percentage_error(y_test, y_pred)
+    msle = np.mean(mean_squared_logarithmic_error(y_test, y_pred))
+    mae = metrics.mean_absolute_error(y_test, y_pred)
+    print('mae: {}\nmape: {}\nmse: {}\nmlse: {}'.format(mae, mape, mse, msle))
+    print('{}\t{}\t{}\t{}'.format(mae, mape, mse, msle))
+
+
+def main():
+    tabular_path = 'data/tabular/tabular_all.csv'
+    histogram_path = 'data/histograms/'
+    join_result_path = 'data/join_results/train/join_results_small_x_small.csv'
+    model_path = 'trained_models/dnn_model.h5'
+    model_weights_path = 'trained_models/dnn_model_weights.h5'
+    run(tabular_path, histogram_path, join_result_path, model_path, model_weights_path, is_train=True)
+
+
+if __name__ == '__main__':
+    main()

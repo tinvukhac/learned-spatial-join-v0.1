@@ -126,7 +126,7 @@ def load_join_data(features_df, result_file, histograms_path, num_rows, num_colu
     result_size = result_df['result_size']
     mbr_tests = result_df['mbr_tests']
 
-    join_selectivity = result_size / (cardinality_x * cardinality_y)
+    join_selectivity = 1 - result_size / (cardinality_x * cardinality_y)
     # join_selectivity = join_selectivity * math.pow(10, 9)
     join_selectivity_log = copy.deepcopy(join_selectivity)
     join_selectivity_log = join_selectivity_log.apply(lambda x: (-1) * math.log10(x))
@@ -231,7 +231,8 @@ def load_join_data2(features_df, result_file, histograms_path, num_rows, num_col
 
 def load_histogram(histograms_path, num_rows, num_columns, dataset):
     hist = np.genfromtxt('{}/{}x{}/{}'.format(histograms_path, num_rows, num_columns, dataset), delimiter=',')
-    normalized_hist = hist / hist.max()
+    # normalized_hist = hist / hist.max() # divide by max value
+    normalized_hist = hist / hist.sum() # divide by sum of all value
     normalized_hist = normalized_hist.reshape((hist.shape[0], hist.shape[1], 1))
     hist = hist.reshape((hist.shape[0], hist.shape[1], 1))
     return normalized_hist, hist

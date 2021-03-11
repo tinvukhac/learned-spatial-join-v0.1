@@ -26,9 +26,9 @@ def extract_histogram(input_filename, output_filename, num_rows, num_columns):
 
 
 def extract_histograms():
-    histogram_dirs = ['16x16']
+    histogram_dirs = ['128x128']
     # f = open('../data/large_datasets.csv')
-    f = open('../data/dataset_filenames/medium_datasets_aligned_filenames.csv')
+    f = open('../data/dataset_filenames/large_aws_filenames.csv')
     lines = f.readlines()
     filenames = [line.strip() for line in lines]
 
@@ -36,8 +36,8 @@ def extract_histograms():
         data = histogram_dir.split('x')
         num_rows = int(data[0])
         num_columns = int(data[1])
-        input_dir = '../data/histograms_raw/histogram_medium/{}'.format(histogram_dir)
-        output_dir = '../data/histograms/medium/{}'.format(histogram_dir)
+        input_dir = '../data/histograms/raw/{}/large_aws'.format(histogram_dir)
+        output_dir = '../data/histograms/{}/large_aws'.format(histogram_dir)
         for filename in filenames:
             extract_histogram('{}/{}'.format(input_dir, filename), '{}/{}'.format(output_dir, filename), num_rows, num_columns)
 
@@ -70,10 +70,12 @@ def extract_histograms_pairs():
 
 
 def shrink_histograms(num_rows, num_columns):
-    input_dir = '../data/histograms/large_datasets_different_distributions/{}x{}'.format(num_rows, num_columns)
-    output_dir = '../data/histograms/large_datasets_different_distributions/{}x{}'.format(num_rows / 2, num_columns / 2)
+    shrinked_rows = int(num_rows / 2)
+    shrinked_columns = int(num_columns / 2)
+    input_dir = '../data/histograms/{}x{}/real'.format(num_rows, num_columns)
+    output_dir = '../data/histograms/{}x{}/real'.format(shrinked_rows, shrinked_columns)
 
-    f = open('../data/dataset_filenames/large_datasets_filenames.csv')
+    f = open('../data/dataset_filenames/real_datasets_intersecting_all_filenames.csv')
     lines = f.readlines()
     filenames = [line.strip() for line in lines]
 
@@ -82,7 +84,7 @@ def shrink_histograms(num_rows, num_columns):
         hist_output_filename = '{}/{}'.format(output_dir, dataset)
 
         hist_input = np.genfromtxt(hist_input_filename, delimiter=',')
-        hist_output = np.zeros((num_rows / 2, num_columns / 2))
+        hist_output = np.zeros((shrinked_rows, shrinked_columns))
 
         for i in range(hist_output.shape[0]):
             for j in range(hist_output.shape[1]):
@@ -93,8 +95,10 @@ def shrink_histograms(num_rows, num_columns):
 
 def main():
     print('Compute histogram')
-    extract_histograms()
+    # extract_histograms()
     # extract_histograms_pairs()
+    # shrink_histograms(128, 128)
+    # shrink_histograms(64, 64)
     # shrink_histograms(32, 32)
 
 
