@@ -1,4 +1,4 @@
-dataset_name,block_size,total_area,total_margin,total_overlap,size_std,block_util,num_partitions
+dataset_name,block_size,total_area,total_margin,total_overlap,size_std,block_util,total_blocks
 small/diagonal_001.csv,131072.0,0.5779730732434384,8.135189784393958,0.0,1476.3124635025556,0.5121512577451509,29
 small/diagonal_002.csv,131072.0,0.40330751885396854,5.014292882565584,0.0,373.9919547560111,0.5134852091471355,15
 small/diagonal_003.csv,131072.0,0.7240464662591213,7.635175469086044,0.0,346.0629751453338,0.5259897141229539,21

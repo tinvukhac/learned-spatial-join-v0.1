@@ -40,6 +40,28 @@ def get_partitions(filename, block_size):
     return partitions
 
 
+def combine_partitions(partitions, block_size):
+    partition = Partition()
+    min_x, min_y, max_x, max_y = float('inf'), float('inf'), float('-inf'), float('-inf')
+    for p in partitions:
+        partition.numRecords += p.numRecords
+        partition.filesize += p.filesize
+        if p.x1 < min_x:
+            min_x = p.x1
+        if p.y1 < min_y:
+            min_y = p.y1
+        if p.x2 > max_x:
+            max_x = p.x2
+        if p.y2 > max_y:
+            max_y = p.y2
+
+    partition.x1, partition.y1, partition.x2, partition.y2 = min_x, min_y, max_x, max_y
+    partition.mbr = Polygon([(partition.x1, partition.y1), (partition.x1, partition.y2), (partition.x2, partition.y2), (partition.x2, partition.y1)])
+    partition.nblocks = math.ceil(float(partition.filesize) / (block_size * 1024 * 1024))
+
+    return partition
+
+
 def get_total_area(partitions):
     total_area = 0
     for p in partitions:
@@ -83,6 +105,13 @@ def get_disk_util(partitions, block_size):
         count += p.nblocks
     util = value / count
     return util
+
+
+def get_total_blocks(partitions):
+    total_blocks = 0
+    for p in partitions:
+        total_blocks += p.nblocks
+    return total_blocks
 
 
 def get_cost(partitions, query_ratio, min_x, min_y, max_x, max_y):
