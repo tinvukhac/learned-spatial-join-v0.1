@@ -17,7 +17,7 @@ def main():
 
     for master_path, dataset_filenames_path, scale, block_size in zip(master_paths, dataset_filenames_paths, scales, block_sizes):
         output_f = open('../data/spatial_quality_metrics/quality_metrics_{}.csv'.format(scale), 'w')
-        output_f.writelines('dataset_name,block_size,total_area,total_margin,total_overlap,size_std,block_util\n')
+        output_f.writelines('dataset_name,block_size,total_area,total_margin,total_overlap,size_std,block_util,num_partitions\n')
 
         f = open(dataset_filenames_path)
         filenames = f.readlines()
@@ -36,7 +36,7 @@ def main():
             size_std = spatial_quality_extractor.get_size_std(partitions)
             block_util = spatial_quality_extractor.get_disk_util(partitions, block_size)
             dataset_filename = '{}/{}{}'.format(scale, filename, extension)
-            output_f.writelines('{},{},{},{},{},{},{}\n'.format(dataset_filename, block_size * 1024 * 1024, total_area, total_margin, total_overlap, size_std, block_util))
+            output_f.writelines('{},{},{},{},{},{},{},{}\n'.format(dataset_filename, block_size * 1024 * 1024, total_area, total_margin, total_overlap, size_std, block_util, len(partitions)))
 
 
 if __name__ == '__main__':
