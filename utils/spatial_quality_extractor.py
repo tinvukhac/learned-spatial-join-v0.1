@@ -68,7 +68,7 @@ def get_total_overlap(partitions):
 def get_size_std(partitions):
     sizes = []
     for p in partitions:
-        sizes.append(p.filesize / 1024 / 1024)
+        sizes.append(p.filesize)
     size_arr = np.array(sizes)
     size_std = np.std(size_arr)
     return size_std
