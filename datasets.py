@@ -4,6 +4,7 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 import copy
 import math
+from shapely.geometry.polygon import Polygon
 
 # A shared random state will ensure that data is split in a same way in both train and test function
 RANDOM_STATE = 42
@@ -42,7 +43,7 @@ def load_tabular_features_hadoop(distribution='all', matched=False, scale='all',
     return X_train, y_train, X_test, y_test
 
 
-def load_tabular_features(join_result_path, tabular_path, normalize=False):
+def load_tabular_features(join_result_path, tabular_path, normalize=False, minus_one=False, target='join_selectivity'):
     tabular_features_df = pd.read_csv(tabular_path, delimiter='\\s*,\\s*', header=0)
     cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
     join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
@@ -53,8 +54,23 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
     cardinality_x = join_df['cardinality_x']
     cardinality_y = join_df['cardinality_y']
     result_size = join_df['result_size']
+    mbr_tests = join_df['mbr_tests']
 
-    join_selectivity = 1 - result_size / (cardinality_x * cardinality_y)
+    # x1_x, y1_x, x2_x, y2_x, x1_y, y1_y, x2_y, y2_y = join_df['x1_x'], join_df['y1_x'], join_df['x2_x'], join_df['y2_x'], join_df['x1_y'], join_df['y1_y'], join_df['x2_y'], join_df['y2_y']
+    # # Compute intersection area 1, intersection area 2 and area similarity
+    # intersect_x1 = pd.concat([x1_x, x1_y]).max(level=0)
+    # intersect_y1 = max(y1_x, y1_y)
+    # intersect_x2 = min(x2_x, x2_y)
+    # intersect_y2 = min(y2_x, y2_y)
+
+    # print(intersect_x1)
+
+    if minus_one:
+        join_selectivity = 1 - result_size / (cardinality_x * cardinality_y)
+        mbr_tests_selectivity = 1 - mbr_tests / (cardinality_x * cardinality_y)
+    else:
+        join_selectivity = result_size / (cardinality_x * cardinality_y)
+        mbr_tests_selectivity = mbr_tests / (cardinality_x * cardinality_y)
 
     join_df = join_df.drop(
         columns=['result_size', 'dataset1', 'dataset2', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration'])
@@ -81,12 +97,13 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
 
     # Append the target to the right of data frame
     join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
+    join_df.insert(len(join_df.columns), 'mbr_tests_selectivity', mbr_tests_selectivity, True)
 
     # TODO: delete this dumping action. This is just for debugging
     join_df.to_csv('data/temp/join_df.csv')
 
     # Split join data to train and test data
-    target = 'join_selectivity'
+    # target = 'join_selectivity'
     train_data, test_data = train_test_split(join_df, test_size=0.20, random_state=RANDOM_STATE)
 
     X_train = pd.DataFrame.to_numpy(train_data[[i for i in range(num_features)]])
@@ -95,6 +112,49 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False):
     y_test = test_data[target]
 
     return X_train, y_train, X_test, y_test
+
+
+def generate_tabular_features(join_result_path, tabular_path, output, normalize=False, minus_one=False):
+    tabular_features_df = pd.read_csv(tabular_path, delimiter='\\s*,\\s*', header=0)
+    cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
+    join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
+    join_df = join_df[join_df.result_size != 0]
+    join_df = pd.merge(join_df, tabular_features_df, left_on='dataset1', right_on='dataset_name')
+    join_df = pd.merge(join_df, tabular_features_df, left_on='dataset2', right_on='dataset_name')
+
+    cardinality_x = join_df['cardinality_x']
+    cardinality_y = join_df['cardinality_y']
+    result_size = join_df['result_size']
+    mbr_tests = join_df['mbr_tests']
+
+    if minus_one:
+        join_selectivity = 1 - result_size / (cardinality_x * cardinality_y)
+        mbr_tests_selectivity = 1 - mbr_tests / (cardinality_x * cardinality_y)
+    else:
+        join_selectivity = result_size / (cardinality_x * cardinality_y)
+        mbr_tests_selectivity = mbr_tests / (cardinality_x * cardinality_y)
+
+    join_df = join_df.drop(
+        columns=['result_size', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration'])
+
+    if normalize:
+        column_groups = [
+            ['AVG area_x', 'AVG area_y'],
+            ['AVG x_x', 'AVG y_x', 'AVG x_y', 'AVG y_y'],
+            ['E0_x', 'E2_x', 'E0_y', 'E2_y'],
+            ['cardinality_x', 'cardinality_y'],
+        ]
+        for column_group in column_groups:
+            input_data = join_df[column_group].to_numpy()
+            original_shape = input_data.shape
+            reshaped = input_data.reshape(input_data.size, 1)
+            reshaped = preprocessing.minmax_scale(reshaped)
+            join_df[column_group] = reshaped.reshape(original_shape)
+
+    # Append the target to the right of data frame
+    join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
+    join_df.insert(len(join_df.columns), 'mbr_tests_selectivity', mbr_tests_selectivity, True)
+    join_df.to_csv(output, index=False)
 
 
 def load_histogram_features(join_result_path, tabular_path, histograms_path, num_rows, num_columns):
@@ -382,10 +442,78 @@ def load_histograms2(result_df, histograms_path, num_rows, num_columns):
         ds2_original_histograms), np.array(ds_all_histogram), np.array(ds_bops_histogram)
 
 
+def compute_intersect_features(input_file, output_file):
+    input_f = open(input_file)
+    output_f = open(output_file, 'w')
+
+    line = input_f.readline()
+    output_f.writelines('{},intersection_area1,intersection_area2,jaccard_similarity\n'.format(line.strip()))
+    line = input_f.readline()
+
+    while line:
+        # Extract mbr of 2 datasets
+        data = line.strip().split(',')
+        dataset1_x1, dataset1_y1, dataset1_x2, dataset1_y2 = float(data[15]), float(data[16]), float(data[17]), float(data[18])
+        dataset2_x1, dataset2_y1, dataset2_x2, dataset2_y2 = float(data[32]), float(data[33]), float(data[34]), float(data[35])
+        dataset1_mbr = Polygon([(dataset1_x1, dataset1_y1), (dataset1_x1, dataset1_y2), (dataset1_x2, dataset1_y2), (dataset1_x2, dataset1_y1)])
+        dataset2_mbr = Polygon([(dataset2_x1, dataset2_y1), (dataset2_x1, dataset2_y2), (dataset2_x2, dataset2_y2), (dataset2_x2, dataset2_y1)])
+        intersection_area1 = dataset1_mbr.intersection(dataset2_mbr).area / dataset1_mbr.area
+        intersection_area2 = dataset1_mbr.intersection(dataset2_mbr).area / dataset2_mbr.area
+        jaccard_similarity = dataset1_mbr.intersection(dataset2_mbr).area / dataset1_mbr.union(dataset2_mbr).area
+        output_f.writelines('{},{},{},{}\n'.format(line.strip(), intersection_area1, intersection_area2, jaccard_similarity))
+
+        line = input_f.readline()
+
+    output_f.close()
+    input_f.close()
+
+
+def load_data(data_path, target, drop_columns):
+    join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
+    y = join_df[target]
+    join_df = join_df.drop(columns=drop_columns)
+
+    # Rename the column's names to numbers for easier access
+    join_df = join_df.rename(columns={x: y for x, y in zip(join_df.columns, range(0, len(join_df.columns)))})
+
+    # Save the number of features in order to extract (X, y) correctly
+    num_features = len(join_df.columns)
+
+    # Append the target to the right of data frame
+    join_df.insert(len(join_df.columns), target, y, True)
+
+    X = pd.DataFrame.to_numpy(join_df[[i for i in range(num_features)]])
+
+    return X, y
+
+
+def split_data(input_file, output_file_train, output_file_test):
+    join_df = pd.read_csv(input_file, delimiter='\\s*,\\s*', header=0)
+    train_data, test_data = train_test_split(join_df, test_size=0.20, random_state=RANDOM_STATE)
+    train_data.to_csv(output_file_train, index=False)
+    test_data.to_csv(output_file_test, index=False)
+
+
 def main():
     print('Dataset utils')
 
-    load_tabular_features_hadoop(distribution='Uniform', matched=True)
+    # load_tabular_features_hadoop(distribution='Uniform', matched=True)
+    # filenames = ['join_results_combined_data.csv',
+    #              'join_results_large_aws_x_large_aws.csv',
+    #              'join_results_large_x_medium.csv',
+    #              'join_results_real_x_real.csv',
+    #              'join_results_small_x_small.csv',
+    #              'join_results_small_x_small_diagonal.csv',
+    #              'join_results_small_x_small_gaussian.csv',
+    #              'join_results_small_x_small_uniform.csv']
+    filenames = ['join_results_small_x_small_repj.csv']
+    for filename in filenames:
+        generate_tabular_features('data/join_results/train/{}'.format(filename), 'data/tabular/tabular_all_v2.csv',
+                                  'data/train_and_test/{}'.format(filename), False, False)
+        compute_intersect_features('data/train_and_test/{}'.format(filename), 'data/train_and_test_all_features/{}'.format(filename))
+        split_data('data/train_and_test_all_features/{}'.format(filename), 'data/train_and_test_all_features_split/train_{}'.format(filename),
+                   'data/train_and_test_all_features_split/test_{}'.format(filename))
+
 
     # features_df = load_datasets_feature('data/uniform_datasets_features.csv')
     # load_join_data(features_df, 'data/uniform_result_size.csv', 'data/histogram_uniform_values', 16, 16)

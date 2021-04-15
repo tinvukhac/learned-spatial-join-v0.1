@@ -1,15 +1,37 @@
 def main():
     print ('Filter data')
-    input_f = open('../data/join_results/train/join_results_small_x_small.csv')
-    output_f = open('../data/join_results/train/join_results_small_x_small_gaussian.csv', 'w')
+    input_f = open('../data/train_and_test_all_features_split/train_join_results_small_x_small.csv')
+    output_f = open('../data/train_and_test_all_features_split/train_join_results_small_x_small_filtered.csv', 'w')
 
-    lines = input_f.readlines()
+    line = input_f.readline()
+    distributions = ['gaussian', 'uniform']
 
-    for line in lines:
+    output_f.writelines(line)
+    line = input_f.readline()
+
+    while line:
         data = line.strip().split(',')
         # result_size = int(data[2])
-        if 'gaussian' in data[0].lower() or 'gaussian' in data[1].lower():
+        write = False
+        # if 'gaussian' in data[0].lower() and 'gaussian' in data[1].lower():
+        #     write = True
+        # if 'gaussian' in data[0].lower() and 'uniform' in data[1].lower():
+        #     write = True
+        # if 'uniform' in data[0].lower() and 'gaussian' in data[1].lower():
+        #     write = True
+        # if 'uniform' in data[0].lower() and 'uniform' in data[1].lower():
+        #     write = True
+
+        join_sel = float(data[36])
+        min_sel = pow(10, -6)
+        max_sel = pow(10, -4)
+        if min_sel < join_sel < max_sel:
+            write = True
+
+        if write:
             output_f.writelines(line)
+
+        line = input_f.readline()
 
     output_f.close()
     input_f.close()

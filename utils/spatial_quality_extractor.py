@@ -81,7 +81,7 @@ def get_total_overlap(partitions):
     for p1 in partitions:
         total_overlap += p1.mbr.area * p1.nblocks * (p1.nblocks - 1) / 2
         for p2 in partitions:
-            if p1 is not p2 and p1.mbr.intersects(p2.mbr) :
+            if p1 is not p2 and p1.mbr.intersects(p2.mbr):
                 total_overlap += p1.mbr.intersection(p2.mbr).area * p1.nblocks * p2.nblocks
 
     return total_overlap

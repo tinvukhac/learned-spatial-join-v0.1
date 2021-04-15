@@ -1,13 +1,14 @@
 def main():
     print ('Extract join result')
-    f = open('../data/join_results/sj.12_30.log')
-    output_f = open('../data/join_results/sj.12_30.log.csv', 'w')
-    algorithms = ['bnlj', 'pbsm', 'dj', 'repj']
+    f = open('../data/join_results/join_results_small_x_small_bnlj.log')
+    output_f = open('../data/join_results/join_results_small_x_small_bnlj.log.csv', 'w')
+    # algorithms = ['bnlj', 'pbsm', 'dj', 'repj']
+    algorithms = ['bnlj']
     header = 'dataset1,dataset2,'
     for algo in algorithms:
         header += '{}_result_size,'.format(algo)
         header += '{}_mbr_tests,'.format(algo)
-        header += '{}_split_count,'.format(algo)
+        # header += '{}_split_count,'.format(algo)
         # if algo == 'repj':
         #     header += '{}_mbr_tests_join,'.format(algo)
         #     header += '{}_mbr_tests_index,'.format(algo)
@@ -19,7 +20,7 @@ def main():
     lines = f.readlines()
 
     for line in lines:
-        data = line.strip().split('all_algorithms')
+        data = line.strip().split('bnlj_result')
         output_f.writelines(data[1][1:] + '\n')
 
     output_f.close()

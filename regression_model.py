@@ -19,6 +19,23 @@ class RegressionModel(ModelInterface):
     MATCHED = False
     SCALE = 'all'
     MINUS_ONE = False
+    # TARGET = 'join_selectivity'
+    TARGET = 'mbr_tests_selectivity'
+    # Descriptors
+    drop_columns_feature_set1 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
+                                 'join_selectivity', 'mbr_tests_selectivity', 'E0_x', 'E2_x', 'total_area_x', 'total_margin_x',
+                                 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x', 'total_area_y', 'total_margin_y',
+                                 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y', 'intersection_area1', 'intersection_area2', 'jaccard_similarity',
+                                 'cardinality_x', 'cardinality_y']
+    # Descriptors + histograms
+    drop_columns_feature_set2 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
+                                 'join_selectivity', 'mbr_tests_selectivity', 'total_area_x', 'total_margin_x',
+                                 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x', 'total_area_y', 'total_margin_y',
+                                 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y', 'cardinality_x', 'cardinality_y']
+    # Descriptors + histograms + partitioning features
+    drop_columns_feature_set3 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
+                                 'join_selectivity', 'mbr_tests_selectivity', 'cardinality_x', 'cardinality_y']
+    DROP_COLUMNS = drop_columns_feature_set2
 
     def __init__(self, model_name):
         self.reg_model = LinearRegression()
@@ -36,8 +53,9 @@ class RegressionModel(ModelInterface):
         """
 
         # Extract train and test data, but only use train data
-        X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
-        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
+        X_train, y_train = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS)
 
         # Fit and save the model
         model = self.reg_model.fit(X_train, y_train)
@@ -51,8 +69,9 @@ class RegressionModel(ModelInterface):
         """
 
         # Extract train and test data, but only use test data
-        X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
-        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
+        # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
+        X_test, y_test = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS)
 
         # Load the model and use it for prediction
         loaded_model = pickle.load(open(model_path, 'rb'))
