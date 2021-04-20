@@ -35,7 +35,7 @@ class RegressionModel(ModelInterface):
     # Descriptors + histograms + partitioning features
     drop_columns_feature_set3 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'cardinality_x', 'cardinality_y']
-    DROP_COLUMNS = drop_columns_feature_set2
+    DROP_COLUMNS = drop_columns_feature_set3
 
     def __init__(self, model_name):
         self.reg_model = LinearRegression()
