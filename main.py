@@ -2,6 +2,8 @@ from optparse import OptionParser
 
 from dnn_model import DNNModel
 from histogram_dnn_model import HistogramDNNModel
+from classification_model import ClassificationModel
+from ranking_model import  RankingModel
 from regression_model import RegressionModel
 
 
@@ -19,7 +21,7 @@ def main():
     (options, args) = parser.parse_args()
     options_dict = vars(options)
 
-    model_names = ['linear', 'decision_tree', 'random_forest', 'dnn', 'hist_dnn']
+    model_names = ['linear', 'decision_tree', 'random_forest', 'dnn', 'hist_dnn', 'clf_decision_tree', 'clf_random_forest', 'rnk_random_forest']
 
     try:
         model_name = options_dict['model']
@@ -33,6 +35,10 @@ def main():
                 model = DNNModel()
             elif model_name == 'hist_dnn':
                 model = HistogramDNNModel()
+            elif model_name in ['clf_decision_tree', 'clf_random_forest']:
+                model = ClassificationModel(model_name)
+            elif model_name in ['rnk_random_forest']:
+                model = RankingModel(model_name)
 
         tabular_path = options_dict['tab']
         histogram_path = options_dict['hist']
@@ -45,6 +51,8 @@ def main():
             model.train(tabular_path, join_result_path, model_path, model_weights_path, histogram_path)
         else:
             mae, mape, mse, msle = model.test(tabular_path, join_result_path, model_path, model_weights_path, histogram_path)
+            if model_name in ['clf_decision_tree', 'clf_random_forest']:
+                exit(1)
             print('mae: {}\nmape: {}\nmse: {}\nmlse: {}'.format(mae, mape, mse, msle))
             print('{}\t{}\t{}\t{}'.format(mae, mape, mse, msle))
 

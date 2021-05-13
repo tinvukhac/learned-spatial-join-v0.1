@@ -116,8 +116,9 @@ def load_tabular_features(join_result_path, tabular_path, normalize=False, minus
 
 def generate_tabular_features(join_result_path, tabular_path, output, normalize=False, minus_one=False):
     tabular_features_df = pd.read_csv(tabular_path, delimiter='\\s*,\\s*', header=0)
-    cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
+    cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration', 'best_algorithm']
     join_df = pd.read_csv(join_result_path, delimiter=',', header=None, names=cols)
+    best_algorithm = join_df['best_algorithm']
     join_df = join_df[join_df.result_size != 0]
     join_df = pd.merge(join_df, tabular_features_df, left_on='dataset1', right_on='dataset_name')
     join_df = pd.merge(join_df, tabular_features_df, left_on='dataset2', right_on='dataset_name')
@@ -135,7 +136,7 @@ def generate_tabular_features(join_result_path, tabular_path, output, normalize=
         mbr_tests_selectivity = mbr_tests / (cardinality_x * cardinality_y)
 
     join_df = join_df.drop(
-        columns=['result_size', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration'])
+        columns=['result_size', 'dataset_name_x', 'dataset_name_y', 'mbr_tests', 'duration', 'best_algorithm'])
 
     if normalize:
         column_groups = [
@@ -154,6 +155,7 @@ def generate_tabular_features(join_result_path, tabular_path, output, normalize=
     # Append the target to the right of data frame
     join_df.insert(len(join_df.columns), 'join_selectivity', join_selectivity, True)
     join_df.insert(len(join_df.columns), 'mbr_tests_selectivity', mbr_tests_selectivity, True)
+    join_df.insert(len(join_df.columns), 'best_algorithm', best_algorithm, True)
     join_df.to_csv(output, index=False)
 
 
@@ -469,7 +471,10 @@ def compute_intersect_features(input_file, output_file):
 
 
 def load_data(data_path, target, drop_columns):
+    bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops.csv', delimiter='\\s*,\\s*', header=0)
     join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
+    join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
+    join_df.to_csv('test.csv')
     y = join_df[target]
     join_df = join_df.drop(columns=drop_columns)
 
@@ -494,6 +499,38 @@ def split_data(input_file, output_file_train, output_file_test):
     test_data.to_csv(output_file_test, index=False)
 
 
+def extract_bops_histograms():
+    f = open('data/join_results/join_pairs.csv')
+    line = f.readline()
+    line = f.readline()
+
+    count = 0
+    while line:
+        count += 1
+        dataset1 = line.strip().split(',')[0]
+        dataset2 = line.strip().split(',')[1]
+
+        dataset1_histogram_path = 'data/histograms/1024x1024/{}'.format(dataset1)
+        dataset2_histogram_path = 'data/histograms/1024x1024/{}'.format(dataset2)
+
+        dataset1_histogram = np.genfromtxt(dataset1_histogram_path, delimiter=',')
+        dataset2_histogram = np.genfromtxt(dataset2_histogram_path, delimiter=',')
+
+        bops_hist = np.multiply(dataset1_histogram, dataset2_histogram)
+        # if bops_hist.max() > 0:
+        #     print('bops_hist.max() > 0')
+        #     bops_hist = bops_hist / bops_hist.max()
+        # else:
+        #     print('bops_hist.max() == 0')
+
+        bops_hist_filename = 'data/histograms/1024x1024/bops/{}.csv'.format(count)
+        np.savetxt(bops_hist_filename, bops_hist.astype(int), fmt='%i', delimiter=',')
+
+        line = f.readline()
+
+    f.close()
+
+
 def main():
     print('Dataset utils')
 
@@ -506,7 +543,7 @@ def main():
     #              'join_results_small_x_small_diagonal.csv',
     #              'join_results_small_x_small_gaussian.csv',
     #              'join_results_small_x_small_uniform.csv']
-    filenames = ['join_results_small_x_small_repj.csv']
+    filenames = ['join_results_large_x_medium_5_12.csv']
     for filename in filenames:
         generate_tabular_features('data/join_results/train/{}'.format(filename), 'data/tabular/tabular_all_v2.csv',
                                   'data/train_and_test/{}'.format(filename), False, False)
@@ -524,6 +561,8 @@ def main():
     #                                                                              'data/data_aligned/histograms/small_datasets', 32,
     #                                                                              32)
     # print (join_data)
+
+    extract_bops_histograms()
 
 
 if __name__ == '__main__':
