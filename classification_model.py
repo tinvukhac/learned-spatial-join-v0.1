@@ -4,9 +4,13 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 import datasets
 from model_interface import ModelInterface
+
+import matplotlib.pyplot as plt
 
 
 class ClassificationModel(ModelInterface):
@@ -20,19 +24,29 @@ class ClassificationModel(ModelInterface):
     TARGET = 'best_algorithm'
     # Descriptors
     drop_columns_feature_set1 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
-                                 'join_selectivity', 'mbr_tests_selectivity', 'E0_x', 'E2_x', 'total_area_x', 'total_margin_x',
+                                 'join_selectivity', 'mbr_tests_selectivity', 'E0_x', 'E2_x', 'E0_y', 'E2_y', 'total_area_x', 'total_margin_x',
                                  'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x', 'total_area_y', 'total_margin_y',
                                  'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y', 'intersection_area1', 'intersection_area2', 'jaccard_similarity',
-                                 'cardinality_x', 'cardinality_y', 'e0', 'e2']
+                                 'cardinality_x', 'cardinality_y', 'e0', 'e2', 'cardinality_x',	'AVG area_x', 'AVG x_x', 'AVG y_x',
+                                 'cardinality_y',	'AVG area_y', 'AVG x_y', 'AVG y_y']
+    feature_set1 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x',
+                    'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y']
     # Descriptors + histograms
     drop_columns_feature_set2 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'total_area_x', 'total_margin_x',
                                  'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x', 'total_area_y', 'total_margin_y',
                                  'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y', 'cardinality_x', 'cardinality_y']
+    feature_set2 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x',
+                    'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y',
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
     # Descriptors + histograms + partitioning features
     drop_columns_feature_set3 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'cardinality_x', 'cardinality_y']
-    DROP_COLUMNS = drop_columns_feature_set3
+    feature_set3 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x', 'block_size_x', 'total_area_x', 'total_margin_x', 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x',
+                    'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y', 'block_size_y', 'total_area_y', 'total_margin_y', 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y',
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
+    DROP_COLUMNS = []
+    SELECTED_COLUMNS = feature_set1
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()
@@ -48,7 +62,7 @@ class ClassificationModel(ModelInterface):
         """
 
         # Extract train and test data, but only use train data
-        X_train, y_train = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS)
+        X_train, y_train = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS, ClassificationModel.SELECTED_COLUMNS)
 
         # Fit and save the model
         model = self.clf_model.fit(X_train, y_train)
@@ -64,7 +78,7 @@ class ClassificationModel(ModelInterface):
         # Extract train and test data, but only use test data
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
-        X_test, y_test = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS)
+        X_test, y_test = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS, ClassificationModel.SELECTED_COLUMNS)
 
         # Load the model and use it for prediction
         loaded_model = pickle.load(open(model_path, 'rb'))
@@ -77,7 +91,25 @@ class ClassificationModel(ModelInterface):
         test_df.to_csv('data/temp/test_df.csv')
 
         # Compute accuracy metrics
-        # acc = metrics.accuracy_score(y_test, y_pred)
+        acc = metrics.accuracy_score(y_test, y_pred)
         print('Accuracy:', metrics.accuracy_score(y_test, y_pred))
 
-        # return acc, acc, acc, acc
+        # Plot non-normalized confusion matrix
+        titles_options = [("figures/confusion_matrix_without_normalization.png", None),
+                          ("figures/confusion_matrix_with_normalization.png", 'true')]
+        class_names = ['BNLJ', 'PBSM', 'DJ', 'RepJ']
+        for title, normalize in titles_options:
+            plt.rcParams.update({'font.size': 14})
+            disp = plot_confusion_matrix(loaded_model, X_test, y_test,
+                                         display_labels=class_names,
+                                         cmap=plt.cm.Blues,
+                                         normalize=normalize)
+            disp.ax_.set_title("")
+
+            print(title)
+            print(disp.confusion_matrix)
+            plt.xlabel('Predicted algorithm', fontsize=16)
+            plt.ylabel('Actual best algorithm', fontsize=16)
+            plt.savefig(title)
+
+        return acc, acc, acc, acc

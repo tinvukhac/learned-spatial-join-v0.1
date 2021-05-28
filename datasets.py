@@ -470,13 +470,16 @@ def compute_intersect_features(input_file, output_file):
     input_f.close()
 
 
-def load_data(data_path, target, drop_columns):
-    bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops.csv', delimiter='\\s*,\\s*', header=0)
+def load_data(data_path, target, drop_columns, selected_columns):
+    bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops2.csv', delimiter='\\s*,\\s*', header=0)
     join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
     join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
     join_df.to_csv('test.csv')
     y = join_df[target]
-    join_df = join_df.drop(columns=drop_columns)
+    if len(drop_columns) > 0:
+        join_df = join_df.drop(columns=drop_columns)
+    if len(selected_columns) > 0:
+        join_df = join_df[selected_columns]
 
     # Rename the column's names to numbers for easier access
     join_df = join_df.rename(columns={x: y for x, y in zip(join_df.columns, range(0, len(join_df.columns)))})
@@ -543,11 +546,11 @@ def main():
     #              'join_results_small_x_small_diagonal.csv',
     #              'join_results_small_x_small_gaussian.csv',
     #              'join_results_small_x_small_uniform.csv']
-    filenames = ['join_results_large_x_medium_5_12.csv']
+    filenames = ['join_results_combined.csv']
     for filename in filenames:
-        generate_tabular_features('data/join_results/train/{}'.format(filename), 'data/tabular/tabular_all_v2.csv',
-                                  'data/train_and_test/{}'.format(filename), False, False)
-        compute_intersect_features('data/train_and_test/{}'.format(filename), 'data/train_and_test_all_features/{}'.format(filename))
+        # generate_tabular_features('data/join_results/train/{}'.format(filename), 'data/tabular/tabular_all_v2.csv',
+        #                           'data/train_and_test/{}'.format(filename), False, False)
+        # compute_intersect_features('data/train_and_test/{}'.format(filename), 'data/train_and_test_all_features/{}'.format(filename))
         split_data('data/train_and_test_all_features/{}'.format(filename), 'data/train_and_test_all_features_split/train_{}'.format(filename),
                    'data/train_and_test_all_features_split/test_{}'.format(filename))
 
@@ -562,7 +565,7 @@ def main():
     #                                                                              32)
     # print (join_data)
 
-    extract_bops_histograms()
+    # extract_bops_histograms()
 
 
 if __name__ == '__main__':
