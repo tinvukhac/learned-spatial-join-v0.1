@@ -46,7 +46,7 @@ class ClassificationModel(ModelInterface):
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y', 'block_size_y', 'total_area_y', 'total_margin_y', 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y',
                     'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
     DROP_COLUMNS = []
-    SELECTED_COLUMNS = feature_set1
+    SELECTED_COLUMNS = feature_set2
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()

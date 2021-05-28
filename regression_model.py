@@ -35,6 +35,7 @@ class RegressionModel(ModelInterface):
     drop_columns_feature_set3 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'cardinality_x', 'cardinality_y']
     DROP_COLUMNS = drop_columns_feature_set2
+    SELECTED_COLUMNS = []
 
     def __init__(self, model_name):
         self.reg_model = LinearRegression()
@@ -54,7 +55,7 @@ class RegressionModel(ModelInterface):
         # Extract train and test data, but only use train data
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
-        X_train, y_train = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS)
+        X_train, y_train = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS, RegressionModel.SELECTED_COLUMNS)
         # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
         # query_val = [X_val.shape[0]]
         #
@@ -76,7 +77,7 @@ class RegressionModel(ModelInterface):
         # Extract train and test data, but only use test data
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
-        X_test, y_test = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS)
+        X_test, y_test = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS, RegressionModel.SELECTED_COLUMNS)
 
         # Load the model and use it for prediction
         loaded_model = pickle.load(open(model_path, 'rb'))
