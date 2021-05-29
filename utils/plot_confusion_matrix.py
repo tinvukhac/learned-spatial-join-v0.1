@@ -8,7 +8,7 @@ def main():
 
     # Remove empty lines from Alberto's data
     # f = open('data/temp/theoretical_algorithm_selection.csv')
-    # output_f = open('data/temp/theoretical_algorithm_selection2.csv', 'w')
+    # output_f = open('data/temp/algorithm_selection_b3.csv', 'w')
     #
     # lines = f.readlines()
     #
@@ -21,9 +21,9 @@ def main():
 
 
     # Plot confusion matrix
-    df = pd.read_csv('data/temp/theoretical_algorithm_selection2.csv', header=0)
-    y_test = df['real_1st']
-    y_pred = df['est_1st']
+    df = pd.read_csv('../data/temp/algorithm_selection_b3.csv', header=0)
+    y_test = df['y_test']
+    y_pred = df['y_pred']
     # cm = confusion_matrix(y_test, y_pred)
 
     class_names = ['BNLJ', 'PBSM', 'DJ', 'RepJ']

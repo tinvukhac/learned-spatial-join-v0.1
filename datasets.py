@@ -471,10 +471,11 @@ def compute_intersect_features(input_file, output_file):
 
 
 def load_data(data_path, target, drop_columns, selected_columns):
-    bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops2.csv', delimiter='\\s*,\\s*', header=0)
+    # bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops2.csv', delimiter='\\s*,\\s*', header=0)
     join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
-    join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
-    join_df.to_csv('test.csv')
+    # join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
+    dataset1 = join_df['dataset1']
+    dataset2 = join_df['dataset2']
     y = join_df[target]
     if len(drop_columns) > 0:
         join_df = join_df.drop(columns=drop_columns)
@@ -489,10 +490,12 @@ def load_data(data_path, target, drop_columns, selected_columns):
 
     # Append the target to the right of data frame
     join_df.insert(len(join_df.columns), target, y, True)
+    join_df.insert(len(join_df.columns), 'dataset1', dataset1, True)
+    join_df.insert(len(join_df.columns), 'dataset2', dataset2, True)
 
     X = pd.DataFrame.to_numpy(join_df[[i for i in range(num_features)]])
 
-    return X, y
+    return X, y, join_df
 
 
 def split_data(input_file, output_file_train, output_file_test):
@@ -546,7 +549,7 @@ def main():
     #              'join_results_small_x_small_diagonal.csv',
     #              'join_results_small_x_small_gaussian.csv',
     #              'join_results_small_x_small_uniform.csv']
-    filenames = ['join_results_combined.csv']
+    filenames = ['join_results_combined_v2.csv']
     for filename in filenames:
         # generate_tabular_features('data/join_results/train/{}'.format(filename), 'data/tabular/tabular_all_v2.csv',
         #                           'data/train_and_test/{}'.format(filename), False, False)
@@ -566,6 +569,12 @@ def main():
     # print (join_data)
 
     # extract_bops_histograms()
+
+    # df1 = pd.read_csv('data/train_and_test_all_features/join_results_real_x_real.csv', delimiter='\\s*,\\s*', header=0)
+    # df2 = pd.read_csv('data/ranked_join_results/join_results_real_datasets_ranked_with_prefix.csv', delimiter='\\s*,\\s*', header=0)
+    # df2 = df2[['dataset1', 'dataset2', '1st']]
+    # df1 = pd.merge(df1, df2, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
+    # df1.to_csv('data/train_and_test_all_features/join_results_real_x_real_with_best_algorithm.csv', index=None)
 
 
 if __name__ == '__main__':

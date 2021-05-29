@@ -9,7 +9,7 @@ def compute_coff1():
 
         normalized = True
         cols = ['dataset1', 'dataset2', 'result_size', 'mbr_tests', 'duration']
-        df = pd.read_csv('data/join_results/train/join_results_large_datasets.csv', header=None, names=cols)
+        df = pd.read_csv('../data/join_results/train/join_results_large_datasets.csv', header=None, names=cols)
 
         X = df[['result_size', 'mbr_tests']].values
         if normalized:
@@ -25,12 +25,12 @@ def compute_coff1():
         y_pred = reg.predict(X)
         prediction_df['estimated_time'] = y_pred.flatten()
         prediction_df['actual_time'] = y
-        prediction_df.to_csv('data/join_results/join_running_time_prediction.csv', index=False)
+        prediction_df.to_csv('../data/join_results/join_running_time_prediction.csv', index=False)
 
         # Create graphic data
-        f = open('data/join_results/join_running_time_prediction.csv')
+        f = open('../data/join_results/join_running_time_prediction.csv')
 
-        output_f = open('data/join_results/prediction/join_results_large_datasets.txt', 'w')
+        output_f = open('../data/join_results/prediction/join_results_large_datasets.txt', 'w')
 
         line = f.readline()
         line = f.readline()
@@ -57,7 +57,7 @@ def compute_coff2():
         #     'data/join_results/prediction/join_results_real_datasets_zcurve_12_2.all_algo.csv', header=0)
         # df = pd.read_csv('data/join_results/prediction/join_results_large_and_non_indexed_medium_datasets.12_2.all_algo.csv', header=0)
         df = pd.read_csv(
-            'data/join_results/prediction/datasets_new_join_cost_model.csv',
+            '../data/join_results/prediction/datasets_new_join_cost_model.csv',
             header=0)
         # print(df)
         # df = df[~df['{}_duration'.format(algorithm)].isnull()]
@@ -86,12 +86,12 @@ def compute_coff2():
         y_pred = reg.predict(X)
         prediction_df['estimated_time'] = y_pred.flatten()
         prediction_df['actual_time'] = y
-        prediction_df.to_csv('data/join_results/prediction/join_running_time_prediction_{}.csv'.format(algorithm), index=False)
+        prediction_df.to_csv('../data/join_results/prediction/join_running_time_prediction_{}.csv'.format(algorithm), index=False)
 
         # Create graphic data
-        f = open('data/join_results/prediction/join_running_time_prediction_{}.csv'.format(algorithm))
+        f = open('../data/join_results/prediction/join_running_time_prediction_{}.csv'.format(algorithm))
 
-        output_f = open('data/join_results/prediction/join_results_large_datasets_{}.txt'.format(algorithm), 'w')
+        output_f = open('../data/join_results/prediction/join_results_large_datasets_{}.txt'.format(algorithm), 'w')
 
         line = f.readline()
         line = f.readline()

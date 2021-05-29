@@ -31,6 +31,8 @@ class ClassificationModel(ModelInterface):
                                  'cardinality_y',	'AVG area_y', 'AVG x_y', 'AVG y_y']
     feature_set1 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y']
+    feature_set1 = ['AVG area_x', 'AVG x_x', 'AVG y_x',
+                    'AVG area_y', 'AVG x_y', 'AVG y_y']
     # Descriptors + histograms
     drop_columns_feature_set2 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'total_area_x', 'total_margin_x',
@@ -38,15 +40,15 @@ class ClassificationModel(ModelInterface):
                                  'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y', 'cardinality_x', 'cardinality_y']
     feature_set2 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y',
-                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity']
     # Descriptors + histograms + partitioning features
     drop_columns_feature_set3 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'cardinality_x', 'cardinality_y']
     feature_set3 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x', 'block_size_x', 'total_area_x', 'total_margin_x', 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y', 'block_size_y', 'total_area_y', 'total_margin_y', 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y',
-                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity']
     DROP_COLUMNS = []
-    SELECTED_COLUMNS = feature_set2
+    SELECTED_COLUMNS = feature_set3
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()
@@ -62,7 +64,7 @@ class ClassificationModel(ModelInterface):
         """
 
         # Extract train and test data, but only use train data
-        X_train, y_train = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS, ClassificationModel.SELECTED_COLUMNS)
+        X_train, y_train, join_df = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS, ClassificationModel.SELECTED_COLUMNS)
 
         # Fit and save the model
         model = self.clf_model.fit(X_train, y_train)
@@ -78,7 +80,7 @@ class ClassificationModel(ModelInterface):
         # Extract train and test data, but only use test data
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
-        X_test, y_test = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS, ClassificationModel.SELECTED_COLUMNS)
+        X_test, y_test, join_df = datasets.load_data(tabular_path, ClassificationModel.TARGET, ClassificationModel.DROP_COLUMNS, ClassificationModel.SELECTED_COLUMNS)
 
         # Load the model and use it for prediction
         loaded_model = pickle.load(open(model_path, 'rb'))
@@ -86,9 +88,11 @@ class ClassificationModel(ModelInterface):
 
         # TODO: delete this dumping action. This is just for debugging
         test_df = pd.DataFrame()
+        test_df['dataset1'] = join_df['dataset1']
+        test_df['dataset2'] = join_df['dataset2']
         test_df['y_test'] = y_test
         test_df['y_pred'] = y_pred
-        test_df.to_csv('data/temp/test_df.csv')
+        test_df.to_csv('data/temp/test_df.csv', index=None)
 
         # Compute accuracy metrics
         acc = metrics.accuracy_score(y_test, y_pred)

@@ -55,7 +55,7 @@ class RegressionModel(ModelInterface):
         # Extract train and test data, but only use train data
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
-        X_train, y_train = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS, RegressionModel.SELECTED_COLUMNS)
+        X_train, y_train, join_df = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS, RegressionModel.SELECTED_COLUMNS)
         # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
         # query_val = [X_val.shape[0]]
         #
@@ -77,7 +77,7 @@ class RegressionModel(ModelInterface):
         # Extract train and test data, but only use test data
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features_hadoop(RegressionModel.DISTRIBUTION, RegressionModel.MATCHED, RegressionModel.SCALE, RegressionModel.MINUS_ONE)
         # X_train, y_train, X_test, y_test = datasets.load_tabular_features(join_result_path, tabular_path, RegressionModel.NORMALIZE, RegressionModel.MINUS_ONE, RegressionModel.TARGET)
-        X_test, y_test = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS, RegressionModel.SELECTED_COLUMNS)
+        X_test, y_test, join_df = datasets.load_data(tabular_path, RegressionModel.TARGET, RegressionModel.DROP_COLUMNS, RegressionModel.SELECTED_COLUMNS)
 
         # Load the model and use it for prediction
         loaded_model = pickle.load(open(model_path, 'rb'))
