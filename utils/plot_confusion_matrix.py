@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 def main():
     print('Plot confusion matrix')
 
+    # Note: somehow you need to run this file on terminal.
+    # I always get FileNotFoundError exception even the file path is correct
+
     # Remove empty lines from Alberto's data
-    # f = open('data/temp/theoretical_algorithm_selection.csv')
-    # output_f = open('data/temp/algorithm_selection_b3.csv', 'w')
+    # f = open('../data/temp/algorithm_selection_b3_updated_5_31.alberto.csv')
+    # output_f = open('../data/temp/algorithm_selection_b3_updated_5_31.csv', 'w')
     #
     # lines = f.readlines()
     #
@@ -21,7 +24,7 @@ def main():
 
 
     # Plot confusion matrix
-    df = pd.read_csv('../data/temp/algorithm_selection_b3.csv', header=0)
+    df = pd.read_csv('../data/temp/algorithm_selection_b3_updated_5_31.csv', header=0)
     y_test = df['y_test']
     y_pred = df['y_pred']
     # cm = confusion_matrix(y_test, y_pred)
@@ -33,7 +36,7 @@ def main():
     disp.plot(cmap=plt.cm.Blues)
     plt.xlabel('Predicted algorithm', fontsize=16)
     plt.ylabel('Actual best algorithm', fontsize=16)
-    plt.savefig('figures/confusion_matrix_with_normalization_b3.png')
+    plt.savefig('../figures/confusion_matrix_with_normalization_b3.png')
 
 
 if __name__ == '__main__':
