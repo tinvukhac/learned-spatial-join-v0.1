@@ -471,9 +471,9 @@ def compute_intersect_features(input_file, output_file):
 
 
 def load_data(data_path, target, drop_columns, selected_columns):
-    # bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops2.csv', delimiter='\\s*,\\s*', header=0)
+    bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops2.csv', delimiter='\\s*,\\s*', header=0)
     join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
-    # join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
+    join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
     dataset1 = join_df['dataset1']
     dataset2 = join_df['dataset2']
     y = join_df[target]

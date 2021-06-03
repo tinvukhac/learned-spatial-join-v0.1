@@ -91,7 +91,7 @@ def main():
     confusion_matrix_values.append(confusion_matrix(y_test, y_pred, labels=[1, 2, 3, 4], normalize='true'))
 
     # Compute second confusion matrix
-    df = pd.read_csv('../data/temp/algorithm_selection_m3_fs3_v2.csv', header=0)
+    df = pd.read_csv('../data/temp/algorithm_selection_m3_fs3_v3.csv', header=0)
     y_test = df['y_test']
     y_pred = df['y_pred']
     confusion_matrix_values.append(confusion_matrix(y_test, y_pred, labels=[1, 2, 3, 4], normalize='true'))

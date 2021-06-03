@@ -40,15 +40,15 @@ class ClassificationModel(ModelInterface):
                                  'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y', 'cardinality_x', 'cardinality_y']
     feature_set2 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y',
-                    'intersection_area1', 'intersection_area2', 'jaccard_similarity']
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
     # Descriptors + histograms + partitioning features
     drop_columns_feature_set3 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'cardinality_x', 'cardinality_y']
     feature_set3 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x', 'block_size_x', 'total_area_x', 'total_margin_x', 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y', 'block_size_y', 'total_area_y', 'total_margin_y', 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y',
-                    'intersection_area1', 'intersection_area2', 'jaccard_similarity']
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
     DROP_COLUMNS = []
-    SELECTED_COLUMNS = feature_set3
+    SELECTED_COLUMNS = feature_set2
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()
