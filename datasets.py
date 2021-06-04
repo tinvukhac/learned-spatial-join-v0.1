@@ -474,6 +474,7 @@ def load_data(data_path, target, drop_columns, selected_columns):
     bops_e_values_df = pd.read_csv('data/join_results/join_pairs_bops2.csv', delimiter='\\s*,\\s*', header=0)
     join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
     join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
+    join_df.dropna(inplace=True)
     dataset1 = join_df['dataset1']
     dataset2 = join_df['dataset2']
     y = join_df[target]
@@ -549,7 +550,7 @@ def main():
     #              'join_results_small_x_small_diagonal.csv',
     #              'join_results_small_x_small_gaussian.csv',
     #              'join_results_small_x_small_uniform.csv']
-    filenames = ['join_results_combined_v2.csv']
+    filenames = ['join_results_combined_v3.csv']
     for filename in filenames:
         # generate_tabular_features('data/join_results/train/{}'.format(filename), 'data/tabular/tabular_all_v2.csv',
         #                           'data/train_and_test/{}'.format(filename), False, False)

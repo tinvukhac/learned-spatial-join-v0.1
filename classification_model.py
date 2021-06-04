@@ -47,8 +47,12 @@ class ClassificationModel(ModelInterface):
     feature_set3 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x', 'block_size_x', 'total_area_x', 'total_margin_x', 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y', 'block_size_y', 'total_area_y', 'total_margin_y', 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y',
                     'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2']
+    # Join cardinality + MBRs of 4 algorithms
+    feature_set4 = ['join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj']
+    feature_set5 = ['join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj', 'block_size_x', 'block_size_y']
+
     DROP_COLUMNS = []
-    SELECTED_COLUMNS = feature_set2
+    SELECTED_COLUMNS = feature_set4
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()

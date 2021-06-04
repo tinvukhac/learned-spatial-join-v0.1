@@ -17,12 +17,13 @@ def get_test_duration(row, label):
 
 def main():
     print('Compute classification regression score')
-    test_filenames = ['../data/temp/algorithm_selection_b3_updated_5_31.csv',
-                      '../data/temp/algorithm_selection_m3_baseline2.csv',
-                      '../data/temp/algorithm_selection_m3_fs1_v2.csv',
-                      '../data/temp/algorithm_selection_m3_fs2_v3.csv',
-                      '../data/temp/algorithm_selection_m3_fs3_v3.csv']
-    # test_filenames = []
+    # test_filenames = ['../data/temp/algorithm_selection_b3_updated_5_31.csv',
+    #                   '../data/temp/algorithm_selection_m3_baseline2.csv',
+    #                   '../data/temp/algorithm_selection_m3_fs1_v2.csv',
+    #                   '../data/temp/algorithm_selection_m3_fs2_v3.csv',
+    #                   '../data/temp/algorithm_selection_m3_fs3_v3.csv']
+    # test_filenames = ['../data/temp/algorithm_selection_m3_fs4_v3.csv']
+    test_filenames = ['../data/temp/test_df.csv']
     join_result_filenames = ['../data/ranked_join_results/join_results_large_aws_x_medium_datasets_ranked.csv',
                             '../data/ranked_join_results/join_results_large_uniform_datasets_ranked.csv',
                             '../data/ranked_join_results/join_results_real_datasets_ranked_with_prefix.csv']
