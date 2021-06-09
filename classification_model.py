@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
+import time
+import numpy as np
 
 import datasets
 from model_interface import ModelInterface
@@ -31,8 +33,6 @@ class ClassificationModel(ModelInterface):
                                  'cardinality_y',	'AVG area_y', 'AVG x_y', 'AVG y_y']
     feature_set1 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x',
                     'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y']
-    feature_set1 = ['AVG area_x', 'AVG x_x', 'AVG y_x',
-                    'AVG area_y', 'AVG x_y', 'AVG y_y']
     # Descriptors + histograms
     drop_columns_feature_set2 = ['dataset1', 'dataset2', 'x1_x', 'y1_x', 'x2_x', 'y2_x', 'x1_y', 'y1_y', 'x2_y', 'y2_y',
                                  'join_selectivity', 'mbr_tests_selectivity', 'total_area_x', 'total_margin_x',
@@ -50,9 +50,13 @@ class ClassificationModel(ModelInterface):
     # Join cardinality + MBRs of 4 algorithms
     feature_set4 = ['join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj']
     feature_set5 = ['join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj', 'block_size_x', 'block_size_y']
+    feature_set6 = ['cardinality_x', 'AVG area_x', 'AVG x_x', 'AVG y_x', 'E0_x', 'E2_x', 'block_size_x', 'total_area_x', 'total_margin_x', 'total_overlap_x', 'size_std_x', 'block_util_x', 'total_blocks_x',
+                    'cardinality_y', 'AVG area_y', 'AVG x_y', 'AVG y_y', 'E0_y', 'E2_y', 'block_size_y', 'total_area_y', 'total_margin_y', 'total_overlap_y', 'size_std_y', 'block_util_y', 'total_blocks_y',
+                    'intersection_area1', 'intersection_area2', 'jaccard_similarity', 'e0', 'e2', 'join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj']
+    feature_set7 = ['join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj', 'block_size_x', 'block_size_y', 'intersection_area1', 'intersection_area2', 'jaccard_similarity']
 
     DROP_COLUMNS = []
-    SELECTED_COLUMNS = feature_set4
+    SELECTED_COLUMNS = feature_set5
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()
@@ -73,6 +77,18 @@ class ClassificationModel(ModelInterface):
         # Fit and save the model
         model = self.clf_model.fit(X_train, y_train)
         pickle.dump(model, open(model_path, 'wb'))
+
+        # Feature importances
+        importances = model.feature_importances_
+
+        output_f = open('data/temp/feature_importances.csv', 'w')
+        output_f.writelines('feature_name,importance_score\n')
+
+        for fname, fscore in zip(ClassificationModel.SELECTED_COLUMNS, importances):
+            print('{},{}'.format(fname, fscore))
+            output_f.writelines('{},{}\n'.format(fname, fscore))
+
+        output_f.close()
 
     def test(self, tabular_path: str, join_result_path: str, model_path: str, model_weights_path=None,
              histogram_path=None) -> (float, float, float, float):

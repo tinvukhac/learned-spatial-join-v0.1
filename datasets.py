@@ -475,6 +475,7 @@ def load_data(data_path, target, drop_columns, selected_columns):
     join_df = pd.read_csv(data_path, delimiter='\\s*,\\s*', header=0)
     join_df = pd.merge(join_df, bops_e_values_df, how='left', left_on=['dataset1', 'dataset2'], right_on=['dataset1', 'dataset2'])
     join_df.dropna(inplace=True)
+    # join_df = join_df.sample(frac=0.8)
     dataset1 = join_df['dataset1']
     dataset2 = join_df['dataset2']
     y = join_df[target]
