@@ -20,11 +20,11 @@ def plot_two_matrices(confusion_matrix_values, titles):
                      cbar_pad=0.15,
                      )
 
-    for i, ax in enumerate(grid[:2]):
+    for n, ax in enumerate(grid[:2]):
         # cm = np.random.random((2, 2))
-        cm = confusion_matrix_values[i]
+        cm = confusion_matrix_values[n]
         im = ax.imshow(cm, vmin=0, vmax=1, cmap=plt.cm.Blues)
-        ax.set_title("{}".format(titles[i]))  # ax.___ instead of plt.___
+        ax.set_title("{}".format(titles[n]))  # ax.___ instead of plt.___
         tick_marks = np.arange(4)
         ax.set_xticks(tick_marks)  # Warning: different signature for [x|y]ticks in pyplot and OO interface
         ax.set_xticklabels(classes, rotation=0)
@@ -35,6 +35,10 @@ def plot_two_matrices(confusion_matrix_values, titles):
             ax.text(j, i, format(cm[i, j], '.3f'),
                     horizontalalignment="center",
                     color="black")
+            if confusion_matrix_values[n][i][j] > 0.7:
+                ax.text(j, i, format(cm[i, j], '.3f'),
+                        horizontalalignment="center",
+                        color="white")
 
         ax.set_ylabel('Actual best algorithm')
         ax.set_xlabel('Predicted algorithm')
@@ -97,7 +101,7 @@ def main():
     confusion_matrix_values.append(confusion_matrix(y_test, y_pred, labels=[1, 2, 3, 4], normalize='true'))
 
     SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-    titles = ['B3{}'.format('1'.translate(SUB)), 'M3']
+    titles = ['B3{}'.format('2'.translate(SUB)), 'M3']
 
     plot_two_matrices(confusion_matrix_values, titles)
 
