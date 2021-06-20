@@ -56,7 +56,7 @@ class ClassificationModel(ModelInterface):
     feature_set7 = ['join_cardinality', 'mbr_bnlj', 'mbr_pbsm', 'mbr_dj', 'mbr_repj', 'block_size_x', 'block_size_y', 'intersection_area1', 'intersection_area2', 'jaccard_similarity']
 
     DROP_COLUMNS = []
-    SELECTED_COLUMNS = feature_set6
+    SELECTED_COLUMNS = feature_set3
 
     def __init__(self, model_name):
         self.clf_model = DecisionTreeClassifier()

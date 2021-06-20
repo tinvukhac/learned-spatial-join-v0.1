@@ -1,4 +1,4 @@
-# Deep learning based model for cost estimation of spatial join
+# Machine learning based model for cost estimation of spatial join
 ## Required Environment
 
 * We recommend to use [PyCharm](https://www.jetbrains.com/pycharm/download/) as the IDE. 
@@ -13,7 +13,7 @@ we would recommend you to install [Anaconda](https://docs.anaconda.com/anaconda/
 
 ## Brief description of the source code
 * train.py: the endpoint to run the program.
-* models.py: the implementation of the models which support train/test activity.
+* main.py: the end-point for train/test activities.
 * datasets.py: data pre-processing module
 * data/histograms: contains csv files, which are the histograms of input datasets (to be fed into the CNN layers).
 * data/tabular: contains csv files, which are the tabular feature of the input datasets (to be fed into the MLP layer).
@@ -24,11 +24,11 @@ we would recommend you to install [Anaconda](https://docs.anaconda.com/anaconda/
 ## Train and test the models
 * Train a model (then test):
 ```python
-python main.py --model linear --tab data/tabular/tabular_all.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --path trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --train
+python main.py --model clf_random_forest --tab data/train_and_test_all_features_split/train_join_results_combined_v3.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --path trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --train
 ```
 * Test a model (no train):
 ```python
-python main.py --model linear --tab data/tabular/tabular_all.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --path trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --no-train
+python main.py --model clf_random_forest --tab data/train_and_test_all_features_split/test_join_results_combined_v3.csv --hist data/histograms/ --result data/join_results/train/join_results_small_x_small_uniform.csv --path trained_models/model_uniform.h5 --weights trained_models/model_weights_uniform.h5 --no-train
 ```
 
 ## How to modify the current implementation?
